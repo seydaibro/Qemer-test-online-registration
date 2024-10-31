@@ -8,81 +8,90 @@ const {
   DefaultAdminsystemAllowance,
 } = require("../constant");
 
+
 const register = async (req, res) => {
-  console.log("Creating a User");
-  console.log(req.body);
-
+  console.log("Creating a User", req.body);
   try {
-    // Extracting fields from the request body
-    const { firstName, surname, email, password, age, course } = req.body;
+    const { firstName, surname, age, courses, email, password, role, phone_number } = req.body;
+    const existingUser = await User.findOne({ email, phone_number });
 
-    // Check if the user already exists by email
-    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      console.log("User already exists");
+      console.log("User found");
       return res.status(400).json({ message: "User already registered" });
     }
 
-    // Encrypt the password using bcryptjs
+    // Use bcrypt to hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create a new user instance with the hashed password and other data
     const newUser = new User({
-      firstName,
+      firstName, 
       surname,
-      email,
-      password: hashedPassword,
       age,
-      course,
+      courses,
+      email,
+      role,
+      phone_number,
+      password: hashedPassword,
     });
 
-    // Save the new user to the database
+    let defaultPermissions;
+    switch (role) {
+      case "admin":
+        defaultPermissions = DefaultAdminsystemAllowance;
+        break;
+      case "teacher":
+        defaultPermissions = defaultTeacherPermission;
+        break;
+      case "student":
+        defaultPermissions = defaultStudentPermission;
+        break;
+      default:
+        return res.status(400).json({ message: "Invalid user role" });
+    }
+
+    const permissions = [];
+    for (const permissionName of defaultPermissions) {
+      let permission = await Permission.findOne({ name: permissionName });
+      if (!permission) {
+        permission = new Permission({ name: permissionName });
+        await permission.save();
+      }
+      permissions.push(permission._id);
+    }
+    newUser.permissions = permissions;
+
     await newUser.save();
-
-    // Generate a JWT token
-    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-
-    // Send success response with user details and token
-    res.status(201).json({
-      message: "User registered successfully",
-      user: {
-        id: newUser._id,
-        firstName: newUser.firstName,
-        surname: newUser.surname,
-        email: newUser.email,
-        age: newUser.age,
-        course: newUser.courses,
-      },
-      token,
-    });
+    console.log(newUser);
+    newUser.password = undefined; // Do not return the password
+    const sendedUser = await newUser.populate("permissions");
+    return res.status(201).json({ message: "User created successfully", user: sendedUser });
   } catch (error) {
-    console.error("Error registering user:", error);
-    res.status(500).json({ message: "An error occurred during registration" });
+    console.error("Error during user registration:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 const login = async (req, res) => {
   try {
     console.log(req.body);
-    const { username, password } = req.body;
-    if (!username || !password) {
+    const { email, password } = req.body;
+    if (!email || !password) {
       return res
         .status(400)
         .json({ message: "Username and password are required." });
     }
-    const foundUser = await User.findOne({ username: username }).exec();
+
+    const foundUser = await User.findOne({ email }).exec();
     if (!foundUser) {
-      console.log("user doen't found");
-      return res.status(401).json({ message: "User doesn't exist" }); // Unauthorized
+      console.log("User doesn't exist");
+      return res.status(401).json({ message: "User doesn't exist" });
     }
 
-    const decryptedPassword = decrypt(foundUser.password);
-    if (password === decryptedPassword) {
+    const passwordMatch = await bcrypt.compare(password, foundUser.password);
+    if (passwordMatch) {
       const token = jwt.sign(
         {
-          username: foundUser.username,
+          email: foundUser.email,
           user_id: foundUser._id,
           role: foundUser.role,
         },
@@ -90,13 +99,13 @@ const login = async (req, res) => {
         { expiresIn: "24h" }
       );
 
-      const popUser = await User.findById(foundUser._doc._id)
-       
+      const popUser = await User.findById(foundUser._id).exec();
       const { password: userPassword, ...others } = popUser._doc;
-      console.log("others", others);
+
+      console.log("Authenticated user:", others);
       return res.json({ token, user: others });
     } else {
-      return res.status(401).json({ message: "Wrong password" });
+      return res.status(401).json({ message: "Incorrect password" });
     }
   } catch (error) {
     console.error("Error during login:", error);
@@ -104,26 +113,8 @@ const login = async (req, res) => {
   }
 };
 
-const checkForceLogout = async (req, res) => {
-  const user_id = req.params.id;
-  let isUserForceLogout = false;
 
-  try {
-    const userMessages = await Message.find({
-      user_id: user_id,
-      event: "forceLogout",
-    });
 
-    if (userMessages.length > 0) {
-      isUserForceLogout = true;
-    }
-
-    return res.json({ forced: isUserForceLogout });
-  } catch (error) {
-    console.error("Error:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-};
 
 const checkUpdatePermission = async (req, res) => {
   const user_id = req.params.id;
@@ -148,6 +139,5 @@ const checkUpdatePermission = async (req, res) => {
 module.exports = {
   login,
   register,
-  checkForceLogout,
   checkUpdatePermission,
 };

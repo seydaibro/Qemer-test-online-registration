@@ -5,6 +5,7 @@ import { Outlet } from "react-router-dom";
 import { useState } from "react";
 import SignUp from "@/pages/signup";
 import SignIn from "@/pages/signin";
+import Home from "@/pages/home";
 
 interface itemProp{
   onOpenSignUP:()=> void
@@ -12,11 +13,12 @@ interface itemProp{
   isSignUPClose:()=>void
 }
 const RootLayout = ({onOpenSignUP, isSignUpOpen,isSignUPClose}:itemProp) => {
-
+const [isOpenLogin, setIsOpenLogin] = useState(false)
   return (
     <>
 {isSignUpOpen && <SignUp role="student" onClose={isSignUPClose}/>}
-  <Navbar  onOpenSignUP={onOpenSignUP} />
+{isOpenLogin && <SignIn onClose={()=>setIsOpenLogin(false)}  />}
+  <Navbar  onOpenSignUP={onOpenSignUP} onOpenLogin={()=>setIsOpenLogin(true)} />      
  <Outlet/>
     </>
   );

@@ -36,82 +36,116 @@ const addCourse = async (req, res) => {
 };
 
 
-const getAllBrands = async (req, res) => {
+const getAllCourses = async (req, res) => {
   try {
-    const brands = await query("SELECT * FROM brands");
-    res.status(200).json(brands);
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
+    // Fetch all courses from the database
+    const courses = await Course.find();
 
-const getOneBrand = async (req, res) => {
-  const { BrandId } = req.params;
-
-  try {
-    const [brand] = await query("SELECT * FROM brands WHERE _id = ?", [
-      BrandId,
-    ]);
-
-    if (!brand) {
-      return res.status(404).json({ error: "Brand not found" });
+    // Check if there are no courses found
+    if (!courses.length) {
+      return res.status(404).json({ message: "No courses found." });
     }
 
-    res.status(200).json(brand);
+    // Respond with the list of courses
+    res.status(200).json(courses);
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error fetching courses:", error);
+    res.status(500).json({ message: "Server error" });
   }
-};
+  const deleteCourse = async (req, res) => {
+    const { id } = req.params; // Get the course ID from the request parameters
+  
+    try {
+      // Find and delete the course by ID
+      const deletedCourse = await Course.findByIdAndDelete(id);
+  
+      // Check if the course was found and deleted
+      if (!deletedCourse) {
+        return res.status(404).json({ message: "Course not found." });
+      }
+  
+      // Respond with a success message
+      res.status(200).json({ message: "Course deleted successfully." });
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  };
+  
+}
 
-
-const removeBrand = async (req, res) => {
+const editCourse = async (req, res) => {
   const { id } = req.params;
-  try {
-    const result = await query("DELETE FROM brands WHERE _id = ?", [id]);
+  const { name, duration, imageUrl, description, prerequisites } = req.body;
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Brand not found" });
+  console.log("Edit course is called", req.body);
+
+  // Validate input
+  if (!name || !duration || !imageUrl) {
+    return res.status(400).json({ message: "Name, duration, and image URL are required." });
+  }
+
+  try {
+    // Check if the course with the given ID exists
+    const course = await Course.findById(id);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found." });
     }
 
-    return res.status(200).json({ _id: id });
+    // Check for unique course name if it’s updated
+    if (name !== course.name) {
+      const existingCourse = await Course.findOne({ name });
+      if (existingCourse) {
+        return res.status(400).json({ message: "Course name must be unique." });
+      }
+    }
+
+    // Update the course fields
+    course.name = name;
+    course.duration = duration;
+    course.imageUrl = imageUrl;
+    course.description = description;
+    course.prerequisites = prerequisites;
+
+    await course.save();
+
+    res.status(200).json(course);
   } catch (error) {
-     return res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error updating course:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-const updateBrand = async (req, res) => {
-  const BrandId = req.params.id;
-  const updatedData = req.body;
+
+
+
+const deleteCourse = async (req, res) => {
+  const { id } = req.params; // Get the course ID from the request parameters
 
   try {
-    const lowercaseName = updatedData.name.toLowerCase();
-    const existingBrand = await query(
-      "SELECT * FROM brands WHERE name = ? AND _id != ?",
-      [lowercaseName, BrandId]
-    );
-    if (existingBrand.length > 0) {
-      return res
-        .status(400)
-        .json({ error: "Brand with the same name already exists" });
+    // Find and delete the course by ID
+    const deletedCourse = await Course.findByIdAndDelete(id);
+
+    // Check if the course was found and deleted
+    if (!deletedCourse) {
+      return res.status(404).json({ message: "Course not found." });
     }
 
-    const result = await query("UPDATE brands SET ? WHERE _id = ?", [
-      updatedData,
-      BrandId,
-    ]);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Brand not found" });
-    }
-
-    return res.status(200).json({ _id: BrandId, ...updatedData });
+    // Respond with a success message
+    res.status(200).json({ message: "Course deleted successfully." });
   } catch (error) {
-    return res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error deleting course:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
+
+
 
 module.exports = {
-addCourse
+addCourse,
+getAllCourses,
+editCourse,
+deleteCourse
 };
 
 

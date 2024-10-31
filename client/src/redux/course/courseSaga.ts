@@ -31,7 +31,7 @@ function* addCourseSaga(action: any): Generator {
 }
 function* getAllCourseSaga(): Generator {
   try {
-    const response: any = yield privateAxios.get("/brand");
+    const response: any = yield privateAxios.get("/course");
     yield put(getAllCourseSuccess(response.data));
   } catch (error: any) {
     yield put(getAllCourseError(error.response.data.message));
@@ -40,11 +40,11 @@ function* getAllCourseSaga(): Generator {
 
 function* EditCourseSaga(action: any): Generator {
   try {
-    const { brand_id, newData } = action.payload;
+    const { id, newData } = action.payload;
 
-    const response: any = yield privateAxios.put("/brand/" + brand_id, newData);
+    const response: any = yield privateAxios.put("/course/edit/" + id, newData);
     yield put(
-     EditCourseSuccess({ brand_id: brand_id, updatedBrand: response.data })
+     EditCourseSuccess({ course_id: id, updateCourse: response.data })
     );
   } catch (error: any) {
     yield put(EditCourseError(error.response.data.error));
@@ -54,7 +54,7 @@ function* EditCourseSaga(action: any): Generator {
 function* DeleteCourseSaga(action: any): Generator {
   try {
     const { brand_id } = action.payload;
-    yield privateAxios.delete("/brand/" + brand_id);
+    yield privateAxios.delete("/course/" + brand_id);
     yield put(deleteCourseSuccess({ brand_id: brand_id }));
   } catch (error: any) {
     yield put(deleteCourseError(error.response.data.error));

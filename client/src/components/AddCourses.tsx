@@ -1,45 +1,51 @@
 import { IoClose } from "react-icons/io5";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { publicAxios } from "@/axios";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { addCourse } from "@/redux/course/courseSlice";
+import { addCourse, EditCourse } from "@/redux/course/courseSlice";
+import { ICourse } from "@/interface";
+import { courseSchema } from "@/validation";
 
 // Define the Zod schema for course validation
-const courseSchema = z.object({
-  name: z.string().nonempty("Course name is required"),
-  duration: z.number().min(1, "Duration must be at least 1 hour"),
-  description: z.string().optional(),
-  prerequisites: z.string().optional(),
-});
-
 type CourseFormData = z.infer<typeof courseSchema>;
 
 interface CourseModalProps {
   onClose: () => void;
+  type: "add" | "edit";
+  course?: ICourse;
 }
 
-const AddCourseModal = ({ onClose }: CourseModalProps) => {
+const AddCourseModal = ({ onClose, type, course }: CourseModalProps) => {
   const [file, setFile] = useState<File | null>(null);
-  const { isAddcourseLoading } = useSelector(
-    (state: RootState) => state.courses
-  );
-const dispatch = useDispatch()
+  const { isAddcourseLoading } = useSelector((state: RootState) => state.courses);
+  const dispatch = useDispatch();
+
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),
   });
 
+  useEffect(() => {
+    if (type === "edit" && course) {
+      setValue("name", course.name);
+      setValue("duration", course.duration);
+      setValue("description", course.description || "");
+      setValue("prerequisites", course.prerequisites || "");
+    }
+  }, [type, course, setValue]);
+
   const upload = async () => {
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      if (file) formData.append("file", file);
       const res = await publicAxios.post("/upload", formData);
       return res.data;
     } catch (err) {
@@ -48,11 +54,13 @@ const dispatch = useDispatch()
   };
 
   const onSubmit: SubmitHandler<CourseFormData> = async (data) => {
-    const imageUrl = await upload();
-    const filename = imageUrl.filename;
-    const finaldata = { ...data, imageUrl:filename }
-    console.log("Course Data:", finaldata);
-    dispatch(addCourse(finaldata))
+    const imageUrl = file ? await upload() : course?.imageUrl;
+    const finalData = { ...data, imageUrl };
+    if (type === "add") {
+      dispatch(addCourse(finalData));
+    } else if (type === "edit" && course) {
+      dispatch(EditCourse({ newData: finalData, id: course._id }));
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,18 +80,24 @@ const dispatch = useDispatch()
         </button>
         <div className="h-full p-12">
           <h1 className="text-xl font-semibold mb-7 text-center">
-            Add New Course
+            {type === "add" ? "Add New Course" : "Edit Course"}
           </h1>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="flex flex-col">
               <div className="relative w-full mb-4">
-                {file && (
+                {file ? (
                   <img
-                    src={`${URL.createObjectURL(file)}`}
+                    src={`${URL.createObjectURL(file)} `}
                     className="w-full h-[100px] object-cover rounded-md absolute"
                     alt="Course"
                   />
-                )}
+                ) : course?.imageUrl ? (
+                  <img
+                    src={course.imageUrl}
+                    className="w-full h-[100px] object-cover rounded-md absolute"
+                    alt="Course"
+                  />
+                ) : null}
                 <input
                   hidden
                   id="file"
@@ -96,7 +110,9 @@ const dispatch = useDispatch()
                   htmlFor="file"
                   className="w-full h-[100px] border border-gray-300 flex items-center justify-center rounded-md cursor-pointer hover:border-blue-500 transition"
                 >
-                  {!file ? <p className="text-gray-500">Upload Course Image</p> : null}
+                  <p className="text-gray-500">
+                    {file || course?.imageUrl ? "Change Image" : "Upload Course Image"}
+                  </p>
                 </label>
               </div>
               <div className="flex flex-col mb-4">
@@ -140,7 +156,7 @@ const dispatch = useDispatch()
               type="submit"
               disabled={isAddcourseLoading}
             >
-              {isAddcourseLoading ? "Loading..." : "Add Course"}
+              {isAddcourseLoading ? "Loading..." : type === "add" ? "Add Course" : "Update Course"}
             </button>
           </form>
         </div>

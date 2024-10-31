@@ -8,12 +8,15 @@ import {
 import { ToastContainer } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./redux/store";
+import 'react-toastify/dist/ReactToastify.css';
 import Home from "./pages/home";
 import Signin from "./pages/signin";
 import Courses from "./pages/courses";
 import SignUp from "./pages/signup";
 import { useState } from "react";
-
+import CourseDetail from "./pages/courseDetail";
+import StudentsList from "./pages/studentsList";
+import Profile from "./pages/profile";
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
@@ -29,7 +32,7 @@ function App() {
 const [isSignUpOpen, setIsSignUpOpen] = useState(false)
   const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     if (!user && !token) {
-      return <Navigate to="/sign-in" />;
+      return <Navigate to="/" />;
     }
     return <>{children}</>;
   };
@@ -54,23 +57,33 @@ const [isSignUpOpen, setIsSignUpOpen] = useState(false)
     {
       path: "/",
       element: (
-        <ProtectedRoute>
+      
           <RootLayout onOpenSignUP={()=>setIsSignUpOpen(true)} isSignUpOpen={isSignUpOpen} isSignUPClose={()=>setIsSignUpOpen(false)}/>
-        </ProtectedRoute>
+      
       ),
       children: [
         {
           path: "/",
-          element: <Home />,
+          element: <Home/>,
         },
         {
           path: "/courses",
           element: <Courses />,
         },
         {
-          path: "/sign-in",
-          element: <Signin />,
+          path: "/course-detail",
+          element: <CourseDetail />,
         },
+
+        {
+          path: "/students",
+          element: <StudentsList/>,
+        },
+        {
+          path: "/profile",
+          element: <Profile/>,
+        },
+       
 
        
       ],
@@ -84,7 +97,7 @@ const [isSignUpOpen, setIsSignUpOpen] = useState(false)
       <RouterProvider router={router} />
       <ToastContainer
         position="top-right"
-        autoClose={500}
+        autoClose={1000}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick

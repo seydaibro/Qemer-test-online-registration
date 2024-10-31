@@ -1,4 +1,5 @@
 const User = require("../model/user");
+const Course = require("../model/course")
 const Permission = require("../model/permission");
 const { decrypt, encrypt } = require("../config/encriptionDecription");
 const {
@@ -12,8 +13,7 @@ const {
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find()
-      .populate("permissions")
-      .populate("branches");
+      .populate("permissions courses")
     const decryptedUsers = users.map((user) => {
       const decryptedPassword = decrypt(user.password);
       return { ...user._doc, password: decryptedPassword };
@@ -77,7 +77,7 @@ const editUser = async (req, res) => {
 
     await existUser.save();
 
-    const populatedUser = await existUser.populate("permissions branches");
+    const populatedUser = await existUser.populate("permissions");
     populatedUser.password = password;
 
     console.log("paswword of exist user", oldPassword);
@@ -160,8 +160,45 @@ const deleteUser = async (req, res) => {
       .json({ message: "Server error", error: error.message });
   }
 };
+
+const registerToCourse = async (req, res) => {
+  const { user_id, course_id } = req.body; // Extract userId and courseId from the request body
+  console.log("register to course is called ", req.body);
+
+  try {
+      // Step 1: Find the user
+      const user = await User.findById(user_id);
+      if (!user) {
+          return res.status(404).json({ message: "User not found" });
+      }
+
+      // Step 2: Add course ID to the user's coursesArray
+      if (!user.courses?.includes(course_id)) {
+          user.courses?.push(course_id);
+          await user.save(); // Save the updated user
+      }
+
+      // Step 3: Increment the number of enrolled students in the course
+      const course = await Course.findById(course_id); // Change courseId to course_id
+      if (!course) {
+          return res.status(404).json({ message: "Course not found" });
+      }
+
+      course.enrolledStudents += 1; // Increment enrolled students
+      await course.save(); // Save the updated course
+
+      return res.status(200).json({ message: "Successfully registered to course", user });
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
+
 module.exports = {
   getAllUsers,
   editUser,
   deleteUser,
+  registerToCourse
 };

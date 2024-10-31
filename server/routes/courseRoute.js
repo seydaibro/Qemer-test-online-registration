@@ -1,14 +1,16 @@
 const router = require("express").Router()
 const {
-    addCourse
+    addCourse,
+    getAllCourses,
+    deleteCourse,
+    editCourse
 } = require("../controller/courseController")
 router.post("/create", addCourse) 
    
-// router.get("/", getAllBrands)
-// router.get("/:id", getOneBrand)
-// router.delete("/:id", removeBrand)
-// router.put("/:id", updateBrand)
-// router.post("/", addBrand)
+ router.get("/", getAllCourses)
+ router.delete("/delete/:id", deleteCourse)
+router.put("/edit/:id", editCourse)
+
 
 
 module.exports = router

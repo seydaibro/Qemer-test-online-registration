@@ -9,6 +9,7 @@ import {privateAxios,publicAxios} from '../../axios'; // Import your API functio
 
 function* loginSaga(action:any):Generator {
     try {
+      console.log("theis si")
         const response:any = yield publicAxios.post("/auth/login", action.payload);
         console.log("Action.Payload", action.payload)
         yield put(userLoginSuccess(response.data)); 

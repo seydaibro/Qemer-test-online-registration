@@ -36,9 +36,14 @@ const UserSchema = new mongoose.Schema({
     trim: true
   },
   courses: {
-    type: [String], // Array of strings, could be course names or IDs
-    default: []
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Course",
+   type: []
   },
+  imageUrl: { 
+    type: String, 
+  
+   },
   role: {
     type: String,
     enum: ['admin', 'teacher', 'student'],

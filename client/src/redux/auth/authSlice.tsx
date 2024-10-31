@@ -7,7 +7,7 @@ interface initialState {
   user:IUser ,
   token:null ,
   isLoading:boolean,
-  error:null,
+  error:null
   isAuthenticated:boolean,
   isTokenValid:boolean
 }

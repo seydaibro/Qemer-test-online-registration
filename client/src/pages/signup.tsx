@@ -3,13 +3,17 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AiOutlineClose } from 'react-icons/ai';
+import { userRegister } from '@/redux/user/userSlice';
+import { useDispatch } from 'react-redux';
+import { userschema } from '@/validation';
 
 interface IFormInputs {
   firstName: string;
   surname: string;
   age?: number; // Age is optional
   email: string;
-  phoneNumber?: string; // Phone number is optional
+  phoneNumber?: string;
+  password:string // Phone number is optional
 }
 
 interface ItemProp {
@@ -18,25 +22,19 @@ interface ItemProp {
 }
 
 // Define the schema using Zod
-const schema = z.object({
-  firstName: z.string().min(1, 'First Name is required'),
-  surname: z.string().min(1, 'Surname is required'),
-  age: z.number().min(1, 'Age must be at least 1').optional(),
-  email: z.string().email('Invalid email address').min(1, 'Email is required'),
-  phoneNumber: z
-  .string()
-    .regex(/^\d{10,15}$/, 'Phone number must be between 10 and 15 digits')
-    .optional(),
-});
+
 
 const SignUp: React.FC<ItemProp> = ({ onClose , role}) => {
+  const dispatch = useDispatch()
   const { register, handleSubmit, formState: { errors } } = useForm<IFormInputs>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(userschema),
   });
 
   const onSubmit: SubmitHandler<IFormInputs> = (data) => {
     const finaldata = {...data, role}
     console.log(finaldata) // Handle the form submission, e.g., send to API
+     dispatch(userRegister(finaldata))
+    
   };
 
   return (
@@ -79,16 +77,17 @@ const SignUp: React.FC<ItemProp> = ({ onClose , role}) => {
 
           {/* Age Field */}
           <div className="mb-4">
-            <label className="block text-gray-700" htmlFor="age">Age (Optional)</label>
+            <label className="block text-gray-700" htmlFor="surname">age</label>
             <input
-              {...register('age', { valueAsNumber: true })}
-              className={`w-full p-2 border ${errors.age ? 'border-red-500' : 'border-gray-300'} rounded`}
-              type="number"
-              id="age"
+              {...register('age')}
+              className={`w-full p-2 border ${errors.surname ? 'border-red-500' : 'border-gray-300'} rounded`}
+              type="text"
+              id="surname"
               placeholder="Enter your age"
             />
-            {errors.age && <p className="text-red-500 text-xs mt-1">{errors.age.message}</p>}
+            {errors.surname && <p className="text-red-500 text-xs mt-1">{errors.surname.message}</p>}
           </div>
+         
 
           {/* Email Field */}
           <div className="mb-4">
@@ -115,7 +114,17 @@ const SignUp: React.FC<ItemProp> = ({ onClose , role}) => {
             />
             {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber.message}</p>}
           </div>
-
+          <div className="mb-4">
+            <label className="block text-gray-700" htmlFor="password">Password</label>
+            <input
+              {...register('password')}
+              className={`w-full p-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded`}
+              type="password"
+              id="password"
+              placeholder="Enter your password"
+            />
+            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+          </div>
           {/* Submit Button */}
           <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition" type="submit">
             Register

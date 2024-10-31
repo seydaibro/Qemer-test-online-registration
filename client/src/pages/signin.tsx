@@ -1,53 +1,58 @@
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { z } from "zod";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInShcema } from "@/validation";
 import { reset, userLogin } from "@/redux/auth/authSlice";
-import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useNavigate } from "react-router-dom";
 import ButtonLoading from "@/components/ButtonLoading";
-const SignIn = () => {
+
+interface SignInProps {
+  onClose: () => void;
+}
+
+const SignIn = ({ onClose }: SignInProps) => {
   const { user, token, error, isLoading } = useSelector(
     (state: RootState) => state.auth
   );
   
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  console.log("user", user, "token", token)
   const {
     register,
     handleSubmit,
     setValue,
-    formState: { errors},
+    control,
+    formState: { errors },
   } = useForm<z.infer<typeof signInShcema>>({
     resolver: zodResolver(signInShcema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
 
   useEffect(() => {
-    setValue("username", "");
+    setValue("email", "");
     setValue("password", "");
-    dispatch(reset())
-  }, []);
-  const onSubmit: SubmitHandler<z.infer<typeof signInShcema>> = async (
-    data
-  ) => {
-   
+    dispatch(reset());
+  }, [dispatch, setValue]);
+
+  const onSubmit: SubmitHandler<z.infer<typeof signInShcema>> = async (data) => {
     try {
-      dispatch(userLogin(data));
-      console.log("loginData", data)
+      console.log("data", data)
+       dispatch(userLogin(data));
       navigate("/");
-      console.log("login buttun is pressed")
     } catch (error) {
-      
+      console.error("Login error:", error);
     }
   };
- 
+
   useEffect(() => {
     if (user && token) {
       navigate("/");
@@ -55,46 +60,53 @@ const SignIn = () => {
   }, [user, token, navigate]);
 
   return (
-    <div className="h-screen    m-auto w-full flex  justify-center items-center">
-      <div className="bg-gradient-to-t from-[#7579ff] to-[#b224ef] text-white h-full md:h-[80vh] w-full md:w-[30%] rounded-md flex flex-col items-center px-6 py-10 ">
-        <div className="mb-4 text-[60px] text-[#333333] flex justify-center items-center w-[120px] h-[120px] rounded-full bg-white mx-auto">
-          <img src="./assets/icons/pawe1.png" />
-        </div>
-        <div>
-          <p className="text-xl capitalize">Welcome</p>
-        </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="md:w-[80%] w-[90%] ">
-          <div className="border-b flex flex-col  w-full py-1 mb-2 mt-8  text-white ">
-            <input
-              className="outline-none w-full placeholder:text-white text-white  active:outline-none bg-transparent border-none focus:bg-transparent focus:border-none focus:outline-none"
-              {...register("username", {
-                required: "Brand is required",
-              })}
-              autoComplete="off"
-              placeholder="username"
+<div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+<div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg relative">
+        <button className="absolute top-2 right-2 text-gray-700 hover:text-gray-900" onClick={onClose}>
+          X
+        </button>
+        <h2 className="text-lg font-semibold mb-4 text-center">Sign In</h2>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="mb-4">
+            <label className="block text-sm font-medium" htmlFor="email">Email</label>
+            <Controller
+              name="email"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="email"
+                  className="border rounded w-full p-2"
+                  placeholder="Email"
+                />
+              )}
             />
+            {errors.email && <p className="text-red-500">{errors.email.message}</p>}
           </div>
-          {errors.username && (
-            <span className="text-red text-sm">{errors.username.message}</span>
-          )}
-          <div className="border-b flex flex-col  w-full py-1 mb-2 mt-8  text-white ">
-            <input
-              type="password"
-              className="outline-none w-full  placeholder:text-white  bg-transparent border-none focus:bg-transparent focus:border-none focus:outline-none"
-              {...register("password", { required: "Category is required" })}
-              placeholder="password"
-              autoComplete="off"
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium" htmlFor="password">Password</label>
+            <Controller
+              name="password"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="password"
+                  className="border rounded w-full p-2"
+                  placeholder="Password"
+                />
+              )}
             />
+            {errors.password && <p className="text-red-500">{errors.password.message}</p>}
           </div>
-          {errors.password && (
-            <span className="text-red text-sm">{errors.password.message}</span>
-          )}
-          {error && <span className="text-red text-sm">{error}</span>}
-          <button
-            className="w-full bg-white text-gray-800 mt-8"
-            type="submit"
-            disabled={isLoading}>
-            {isLoading ? <ButtonLoading /> : "Sign in"}
+
+          <button 
+            type="submit" 
+            className={`bg-blue-500 text-white rounded p-2 w-full ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isLoading}
+          >
+            {isLoading ? <ButtonLoading /> : 'Sign In'}
           </button>
         </form>
       </div>

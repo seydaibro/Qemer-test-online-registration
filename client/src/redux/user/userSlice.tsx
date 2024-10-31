@@ -94,7 +94,22 @@ const userSlice= createSlice({
     deleteUserError:(state, action)=>{
       state.isDeletingUserLoading = false;
       state.error = action.payload
-    }
+    },
+
+    userRegisterToCourse: (state, _action) => {
+      state.isAddUserLoading = true;
+      state.error = null;
+    },
+    userRegisterSuccessToCourse: (state, action) => {
+      state.isAddUserLoading = false;
+      state.users.push(action.payload.user);
+      state.token = action.payload.token ;
+      state.error = null
+    },
+    userRegisterToCourseError: (state, action) => {
+      state.error = action.payload;
+      state.isAddUserLoading = false;
+    },
   },
 });
 
@@ -112,6 +127,9 @@ export const {
   deleteUser,
   deleteUserError,
   deleteUserSuccess,
+  userRegisterSuccessToCourse,
+  userRegisterToCourse,
+  userRegisterToCourseError
 } = userSlice.actions;
 
 export default userSlice.reducer;
