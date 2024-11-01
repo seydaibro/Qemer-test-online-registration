@@ -1,19 +1,16 @@
 // albumSaga.ts
 import { takeLatest, put } from "redux-saga/effects";
 import {
-  addCourse,
+  
   addCourseError,
   getAllCourseSuccess,
-  reset,
   addCourseSuccess,
-  getAllCourse,
-  EditCourse,
   getAllCourseError,
   EditCourseError,
   EditCourseSuccess,
   deleteCourseError,
   deleteCourseSuccess,
-  deleteCourse,
+
 } from "./courseSlice"; // Import your actions
 import { privateAxios } from "../../axios"; // Import your API functions or use axios directly
 

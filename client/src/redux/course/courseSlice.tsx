@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { IOptional } from "@/interface";
 import { ICourse } from "@/interface";
 
 interface InitialState {
