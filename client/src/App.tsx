@@ -64,11 +64,11 @@ const [isSignUpOpen, setIsSignUpOpen] = useState(false)
       children: [
         {
           path: "/",
-          element: <Home/>,
+          element: <Home  onOpen={()=> setIsSignUpOpen(true) }/>,
         },
         {
           path: "/courses",
-          element: <Courses />,
+          element: <Courses/>,
         },
         {
           path: "/course-detail",

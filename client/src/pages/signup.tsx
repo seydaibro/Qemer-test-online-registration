@@ -61,7 +61,7 @@ const SignUp: React.FC<ItemProp> = ({ onClose, role, type = "add" }) => {
         </button>
         
         <h2 className="text-2xl font-bold mb-4 text-center">
-          {type === "add" ? "Student Registration" : "Edit User"}
+          {type === "add" ? "Student Signup" : "Edit Account"}
         </h2>
         
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -138,14 +138,9 @@ const SignUp: React.FC<ItemProp> = ({ onClose, role, type = "add" }) => {
           </div>
           
           <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition" type="submit">
-            {type === "add" ? "Register" : "Update"}
+            {type === "add" ? "Signup" : "Update"}
           </button>
         </form>
-        
-        <p className="mt-4 text-sm text-gray-600 text-center">
-          Already have an account?{' '}
-          <a href="/login" className="text-blue-500 hover:underline">Back to Login</a>
-        </p>
       </div>
     </div>
   );
