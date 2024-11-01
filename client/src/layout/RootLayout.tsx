@@ -16,7 +16,7 @@ const RootLayout = ({onOpenSignUP, isSignUpOpen,isSignUPClose}:itemProp) => {
 const [isOpenLogin, setIsOpenLogin] = useState(false)
   return (
     <>
-{isSignUpOpen && <SignUp role="student" onClose={isSignUPClose}/>}
+{isSignUpOpen && <SignUp  type="add" role="student" onClose={isSignUPClose}/>}
 {isOpenLogin && <SignIn onClose={()=>setIsOpenLogin(false)}  />}
   <Navbar  onOpenSignUP={onOpenSignUP} onOpenLogin={()=>setIsOpenLogin(true)} />      
  <Outlet/>

@@ -1,55 +1,70 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AiOutlineClose } from 'react-icons/ai';
-import { userRegister } from '@/redux/user/userSlice';
-import { useDispatch } from 'react-redux';
+import { userRegister, editUser } from '@/redux/user/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
 import { userschema } from '@/validation';
+import { RootState } from '@/redux/store';
 
 interface IFormInputs {
   firstName: string;
   surname: string;
-  age?: number; // Age is optional
+  age?: string;
   email: string;
-  phoneNumber?: string;
-  password:string // Phone number is optional
+  phone_number?: string;
+  password: string;
 }
 
 interface ItemProp {
   onClose: () => void;
-  role:"student"|"teacher"|"admin"
+  role?: "student" | "admin";
+  type?: "add" | "edit";
 }
 
-// Define the schema using Zod
-
-
-const SignUp: React.FC<ItemProp> = ({ onClose , role}) => {
-  const dispatch = useDispatch()
-  const { register, handleSubmit, formState: { errors } } = useForm<IFormInputs>({
+const SignUp: React.FC<ItemProp> = ({ onClose, role, type = "add" }) => {
+  const dispatch = useDispatch();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<IFormInputs>({
     resolver: zodResolver(userschema),
   });
 
+  // Pre-fill the form if in edit mode
+  useEffect(() => {
+    if (type === "edit" && user) {
+      setValue('firstName', user.firstName);
+      setValue('surname', user.surname);
+      setValue('age', user?.age);
+      setValue('email', user.email);
+      setValue('phone_number', user.phone_number);
+      setValue('password', user.password); // Consider hiding or modifying this in actual applications
+    }
+  }, [type, user, setValue]);
+
   const onSubmit: SubmitHandler<IFormInputs> = (data) => {
-    const finaldata = {...data, role}
-    console.log(finaldata) // Handle the form submission, e.g., send to API
-     dispatch(userRegister(finaldata))
-    
+    const finalData = { ...data, role };
+    if (type === "add") {
+      dispatch(userRegister(finalData));
+    } else {
+      dispatch(editUser({ newData:finalData, id: user._id })); // Assuming `user.id` is available
+    }
+    onClose();
   };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
       <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg relative">
         
-        {/* Close button */}
         <button onClick={onClose} className="absolute top-4 right-4 text-gray-700 hover:text-gray-900">
           <AiOutlineClose size={24} />
         </button>
         
-        <h2 className="text-2xl font-bold mb-4 text-center">Student Registration</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">
+          {type === "add" ? "Student Registration" : "Edit User"}
+        </h2>
         
         <form onSubmit={handleSubmit(onSubmit)}>
-          {/* First Name Field */}
           <div className="mb-4">
             <label className="block text-gray-700" htmlFor="firstName">First Name</label>
             <input
@@ -62,7 +77,6 @@ const SignUp: React.FC<ItemProp> = ({ onClose , role}) => {
             {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName.message}</p>}
           </div>
 
-          {/* Surname Field */}
           <div className="mb-4">
             <label className="block text-gray-700" htmlFor="surname">Surname</label>
             <input
@@ -75,21 +89,18 @@ const SignUp: React.FC<ItemProp> = ({ onClose , role}) => {
             {errors.surname && <p className="text-red-500 text-xs mt-1">{errors.surname.message}</p>}
           </div>
 
-          {/* Age Field */}
           <div className="mb-4">
-            <label className="block text-gray-700" htmlFor="surname">age</label>
+            <label className="block text-gray-700" htmlFor="age">Age</label>
             <input
               {...register('age')}
-              className={`w-full p-2 border ${errors.surname ? 'border-red-500' : 'border-gray-300'} rounded`}
+              className={`w-full p-2 border ${errors.age ? 'border-red-500' : 'border-gray-300'} rounded`}
               type="text"
-              id="surname"
+              id="age"
               placeholder="Enter your age"
             />
-            {errors.surname && <p className="text-red-500 text-xs mt-1">{errors.surname.message}</p>}
+            {errors.age && <p className="text-red-500 text-xs mt-1">{errors.age.message}</p>}
           </div>
-         
 
-          {/* Email Field */}
           <div className="mb-4">
             <label className="block text-gray-700" htmlFor="email">Email</label>
             <input
@@ -102,18 +113,18 @@ const SignUp: React.FC<ItemProp> = ({ onClose , role}) => {
             {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
           </div>
 
-          {/* Phone Number Field */}
           <div className="mb-4">
             <label className="block text-gray-700" htmlFor="phoneNumber">Phone Number (Optional)</label>
             <input
-              {...register('phoneNumber')}
-              className={`w-full p-2 border ${errors.phoneNumber ? 'border-red-500' : 'border-gray-300'} rounded`}
+              {...register('phone_number')}
+              className={`w-full p-2 border ${errors.phone_number ? 'border-red-500' : 'border-gray-300'} rounded`}
               type="tel"
               id="phoneNumber"
               placeholder="Enter your phone number"
             />
-            {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber.message}</p>}
+            {errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number.message}</p>}
           </div>
+
           <div className="mb-4">
             <label className="block text-gray-700" htmlFor="password">Password</label>
             <input
@@ -125,9 +136,9 @@ const SignUp: React.FC<ItemProp> = ({ onClose , role}) => {
             />
             {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
           </div>
-          {/* Submit Button */}
+          
           <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition" type="submit">
-            Register
+            {type === "add" ? "Register" : "Update"}
           </button>
         </form>
         

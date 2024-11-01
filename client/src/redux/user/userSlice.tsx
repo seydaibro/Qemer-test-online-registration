@@ -9,6 +9,7 @@ interface initialState {
   error:null,
   isAddUserLoading:boolean,
   isDeletingUserLoading:boolean;
+  selectedUser:IUser
 }
 
 const initialState:initialState= {
@@ -18,6 +19,7 @@ const initialState:initialState= {
   error: null,
   isAddUserLoading:false,
   isDeletingUserLoading:false,
+  selectedUser:null
 };
 
 const userSlice= createSlice({
@@ -61,19 +63,8 @@ const userSlice= createSlice({
     }, 
     // what if states of the user are none
     editUserSuccess:(state, action)=>{
-      const {user_id, edit_user} = action.payload
-         const editedUser = state.users.find((user)=> user._id == user_id)
-         const updated_users =  state.users.reduce((accumulater:IUser[], user )=>{
-                if(user._id === editedUser?._id){
-                  return [...accumulater, edit_user]
-                }else{
-                  return  [...accumulater, user]
-                }
-         },[]); 
-
-
         //  I wantto check if that is happening and remove that user ()
-         state.users = updated_users;
+         state.selectedUser = action.payload;
          state.isAddUserLoading  = false;
     },
     editUserError:(state, action)=>{
@@ -110,6 +101,23 @@ const userSlice= createSlice({
       state.error = action.payload;
       state.isAddUserLoading = false;
     },
+    getUserById: (state,_action) => {
+      state.selectedUser = null;
+      state.isLoading = true;
+      state.error = null;
+    },
+    // Set the fetched user data
+    getUserByIdSuccess: (state, action) => {
+      
+    
+      state.selectedUser = action.payload.user; // Assuming the payload contains the user object
+      state.isLoading = false;
+    },
+    // Handle error while fetching user by ID
+    getUserByIdError: (state, action) => {
+      state.error = action.payload.message;
+      state.isLoading = false;
+    },
   },
 });
 
@@ -129,7 +137,10 @@ export const {
   deleteUserSuccess,
   userRegisterSuccessToCourse,
   userRegisterToCourse,
-  userRegisterToCourseError
+  userRegisterToCourseError,
+  getUserById,
+  getUserByIdError,
+  getUserByIdSuccess
 } = userSlice.actions;
 
 export default userSlice.reducer;

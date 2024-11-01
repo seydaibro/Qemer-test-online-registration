@@ -62,7 +62,7 @@ const register = async (req, res) => {
     await newUser.save();
     console.log(newUser);
     newUser.password = undefined; // Do not return the password
-    const sendedUser = await newUser.populate("permissions");
+    const sendedUser = await newUser.populate("permissions courses");
     return res.status(201).json({ message: "User created successfully", user: sendedUser });
   } catch (error) {
     console.error("Error during user registration:", error);
@@ -99,7 +99,8 @@ const login = async (req, res) => {
         { expiresIn: "24h" }
       );
 
-      const popUser = await User.findById(foundUser._id).exec();
+      const popUser = await User.findById(foundUser._id).populate("courses")
+      .populate("permissions").exec();
       const { password: userPassword, ...others } = popUser._doc;
 
       console.log("Authenticated user:", others);

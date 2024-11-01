@@ -1,6 +1,6 @@
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { z } from "zod";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInShcema } from "@/validation";
 import { reset, userLogin } from "@/redux/auth/authSlice";
@@ -17,6 +17,7 @@ const SignIn = ({ onClose }: SignInProps) => {
   const { user, token, error, isLoading } = useSelector(
     (state: RootState) => state.auth
   );
+  const [isDataSubmitted, setIsDataSubmited] = useState(false)
   
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -24,7 +25,6 @@ const SignIn = ({ onClose }: SignInProps) => {
 
   console.log("user", user, "token", token)
   const {
-    register,
     handleSubmit,
     setValue,
     control,
@@ -47,7 +47,9 @@ const SignIn = ({ onClose }: SignInProps) => {
     try {
       console.log("data", data)
        dispatch(userLogin(data));
+       setIsDataSubmited(true)
       navigate("/");
+
     } catch (error) {
       console.error("Login error:", error);
     }
@@ -56,8 +58,9 @@ const SignIn = ({ onClose }: SignInProps) => {
   useEffect(() => {
     if (user && token) {
       navigate("/");
+      onClose()
     }
-  }, [user, token, navigate]);
+  }, [user, token, navigate,!error, !isLoading]);
 
   return (
 <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">

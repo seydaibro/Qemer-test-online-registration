@@ -15,11 +15,12 @@ interface itemProp {
 const Navbar = ({ onOpenSignUP, onOpenLogin }: itemProp) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [isDropdownOpen, setDropdownOpen] = useState(false); // State to manage dropdown visibility
+  
 const dispatch = useDispatch()
 const navigate = useNavigate()
   const toggleDropdown = () => {
     setDropdownOpen(!isDropdownOpen);
-  };
+  }
 
   const handlenavigateToprofile = ()=>{
     navigate("/profile", {state:{user:user}})
@@ -28,7 +29,7 @@ const navigate = useNavigate()
     <nav className="bg-blue-900 text-white shadow-md">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="text-2xl font-bold">Pawe Tech University</div>
-
+      
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-6 items-center">
           <Link to="/" className="hover:text-gray-300">Home</Link>
@@ -53,15 +54,22 @@ const navigate = useNavigate()
             </div>
       
             {isDropdownOpen && (
-              <div className="absolute top-10 right-0 mt-2 w-40 bg-white rounded-lg shadow-lg py-2">
+              <div className="absolute top-10 right-0 mt-2 w-40 bg-white rounded-lg shadow-lg py-2 z-20">
                 <button
-                onClick={handlenavigateToprofile}
+               onClick={() => {
+                handlenavigateToprofile();
+                setDropdownOpen(false);
+            }}
+            
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   Profile
                 </button>
                 <button
-                  onClick={()=>dispatch(userLogout())}
+                  onClick={()=> {
+                    setDropdownOpen(false); 
+                    dispatch(userLogout())
+                  }}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   Log Out

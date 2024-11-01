@@ -1,7 +1,7 @@
 const User = require("../model/user");
 const Course = require("../model/course")
 const Permission = require("../model/permission");
-const { decrypt, encrypt } = require("../config/encriptionDecription");
+const bcrypt = require("bcryptjs");
 const {
   defaultStockKeeperPermission,
   defaultsalePermission,
@@ -14,115 +14,69 @@ const getAllUsers = async (req, res) => {
   try {
     const users = await User.find()
       .populate("permissions courses")
-    const decryptedUsers = users.map((user) => {
-      const decryptedPassword = decrypt(user.password);
-      return { ...user._doc, password: decryptedPassword };
-    });
-    return res.status(200).json({ users: decryptedUsers });
+      .select("-password"); // Exclude password field from the results
+
+    return res.status(200).json({ users });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "server error while feching" });
+    console.error("Error fetching users:", error);
+    return res.status(500).json({ message: "Server error while fetching users" });
   }
 };
 
+
 const editUser = async (req, res) => {
-  console.log("user edit callded");
-  console.log("userSocketMap", userSocketMap);
+  console.log("Editing User", req.body);
   const userId = req.params.id;
-
-  const { user_info, permissions, allowed_branches } = req.body;
-  const { role, password } = user_info;
-  let system_permission = [];
-  //  console.log(req.body)
   try {
-    const existUser = await User.findById(userId);
-    const oldPassword = existUser.password;
-    const oldUserName = existUser.username;
-    if (!existUser) {
-      return res.status(400).json({ message: "User does not exist" });
+    const { firstName, surname, age, courses, email, password, phone_number } = req.body;
+
+    // Find the existing user by userId
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const roleExistUser = existUser.role;
+    // Update user fields if they are provided
+    user.firstName = firstName || user.firstName;
+    user.surname = surname || user.surname;
+    user.age = age || user.age;
+    user.courses = courses || user.courses;
+    user.email = email || user.email;
+    user.phone_number = phone_number || user.phone_number;
 
-    if (role === roleExistUser) {
-      system_permission = permissions;
-    } else {
-      let defaultPermissions;
-      switch (role) {
-        case "admin":
-          defaultPermissions = DefaultAdminsystemAllowance;
-          break;
-        case "sales":
-          defaultPermissions = defaultsalePermission;
-          break;
-        case "stock_keeper":
-          defaultPermissions = defaultStockKeeperPermission;
-          break;
-        default:
-          return res.status(400).json({ message: "Invalid role specified" });
-      }
-
-      const permissions = await Permission.find({
-        name: { $in: defaultPermissions },
-      });
-      system_permission = permissions.map((perm) => perm._id);
+    // Update password if a new one is provided
+    if (password) {
+      user.password = await bcrypt.hash(password, 10);
     }
-    const hashedPassword = encrypt(password);
-    user_info.password = hashedPassword;
-    existUser.set({
-      ...user_info,
-      permissions: system_permission,
-      branches: allowed_branches,
-    });
 
-    await existUser.save();
+    // Save updated user data
+    await user.save();
 
-    const populatedUser = await existUser.populate("permissions");
-    populatedUser.password = password;
-
-    console.log("paswword of exist user", oldPassword);
-    console.log("now password", hashedPassword);
-    console.log("exist user name", oldUserName);
-    console.log("now  user name", user_info.username);
-
-    //
-
-    if (oldUserName != user_info.username || oldPassword != hashedPassword) {
-      // this means the admin doen't want the user to access the website so they have to force logout
-      // first lets check if that user is
-      if (userId in userSocketMap) {
-        io.to(userSocketMap[userId]).emit("forceLogout");
-        console.log("pasword is changed");
-      } else {
-        const message = new Message({
-          user_id: userId,
-          event: "forceLogout",
-        });
-
-        await message.save();
-        // let me store the message after when he is connecting or let change the authentication
-      }
-    } else {
-      if (userId in userSocketMap) {
-        io.to(userSocketMap[userId]).emit("permissionsUpdated", {
-          user: populatedUser,
-        });
-        console.log("permission is changed");
-      } else {
-        // what I am going to do
-
-        const message = new Message({
-          user_id: userId,
-          event: "updatePermission",
-        });
-
-        await message.save();
-      }
-    }
-    return res.status(200).json(populatedUser);
+    user.password = undefined; // Hide password in response
+    const updatedUser = await user.populate("courses");
+    return res.status(200).json( updatedUser );
   } catch (error) {
-    console.error("An error occurred:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("Error during user update:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const getUserById = async (req, res) => {
+  try {
+    console.log("get user by id is called", req.params.id)
+    const  id  = req.params.id; // Get the user ID from the request parameters
+    const user = await User.findById(id)
+      .populate("permissions courses")
+      .select("-password"); // Exclude password from the results
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({ user });
+  } catch (error) {
+    console.error("Error fetching user by ID:", error);
+    return res.status(500).json({ message: "Server error while fetching user" });
   }
 };
 
@@ -200,5 +154,6 @@ module.exports = {
   getAllUsers,
   editUser,
   deleteUser,
-  registerToCourse
+  registerToCourse,
+  getUserById
 };
