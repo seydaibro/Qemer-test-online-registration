@@ -58,7 +58,6 @@ const courseSlice = createSlice({
     },
     EditCourseSuccess: (state, action) => {
       const { id, updatedCourse } = action.payload;
-      // const Brand_id = action.payload.Brand_id;
       const updated_Items = state.courses.reduce(
         (accumulater: ICourse[], c) => {
           if (id === c._id) {
