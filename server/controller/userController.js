@@ -93,20 +93,7 @@ const deleteUser = async (req, res) => {
 
     // Delete the user
     await User.findByIdAndDelete(userId);
-    console.log(userSocketMap)
-    if (userId in userSocketMap) {
-      io.to(userSocketMap[userId]).emit("forceLogout");
-      console.log("pasword is changed");
-    } else {
-      const message = new Message({
-        user_id: userId,
-        event: "forceLogout",
-      });
-    console.log("message save")
-      await message.save();
-    }
-
-    return res.status(200).json({ message: "User deleted successfully" });
+    return res.status(200).json(userId);
   } catch (error) {
     console.log("erro", error)
     return res

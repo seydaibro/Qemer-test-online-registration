@@ -30,7 +30,7 @@ const StudentsList = () => {
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto px-3 md:px-8 py-8">
       <h2 className="text-2xl font-bold mb-4 text-center">Students List</h2>
       <table className="min-w-full bg-white border border-gray-300">
         <thead>

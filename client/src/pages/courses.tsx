@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
 import { getAllCourse } from "@/redux/course/courseSlice";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { userRegisterToCourse } from "@/redux/user/userSlice";
 import { ICourse } from "@/interface";
 import { toast } from "react-toastify";
@@ -56,16 +56,16 @@ const Courses = () => {
 
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-center mb-8">
-          Manage Your Courses
+         { user?.role === "admin" ?"Manage Your Courses": "Explore Courses"}
         </h1>
-        <button
+        { user?.role === "admin" && <button
           onClick={() => setIsOpenAddCourse(true)}
           className="mb-6 bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 transition"
         >
           Add Course
         </button>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-8">
           {courses.length === 0 ? (
             <div className="col-span-1 text-center">
               <p className="text-gray-500">No courses available.</p>

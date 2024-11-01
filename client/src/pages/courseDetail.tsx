@@ -2,11 +2,18 @@ import { useLocation } from "react-router-dom";
 import { ICourse } from "@/interface";
 import AddCourseModal from "@/components/AddCourses";
 import { useState } from "react";
+import { deleteCourse } from "@/redux/course/courseSlice";
+import { useDispatch } from "react-redux";
 
 const CourseDetail = () => {
   const location = useLocation();
+  const dispatch = useDispatch()
   const currentCourse: ICourse = location.state?.currentCourse;
   const [isOpenEditCourse, setIsOpenEditCourse] = useState(false);
+
+  const handleDeletecourse = () =>{
+  dispatch(deleteCourse(currentCourse._id))
+  }
   return (
     <>
      {isOpenEditCourse && (
@@ -53,8 +60,8 @@ const CourseDetail = () => {
               Edit Course
             </button>
             <button
-              className="bg-red-600 text-white px-4 py-2 rounded-md shadow hover:bg-red-700 transition"
-              onClick={() => {/* Delete functionality */}}
+              className="bg-red text-white px-4 py-2 rounded-md shadow hover:bg-red-700 transition"
+              onClick={handleDeletecourse}
             >
               Delete Course
             </button>
