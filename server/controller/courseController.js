@@ -121,18 +121,11 @@ const editCourse = async (req, res) => {
 
 const deleteCourse = async (req, res) => {
   const { id } = req.params; // Get the course ID from the request parameters
-
   try {
     // Find and delete the course by ID
-    const deletedCourse = await Course.findByIdAndDelete(id);
+   await Course.findByIdAndDelete(id);
 
-    // Check if the course was found and deleted
-    if (!deletedCourse) {
-      return res.status(404).json({ message: "Course not found." });
-    }
-
-    // Respond with a success message
-    res.status(200).json({ message: "Course deleted successfully." });
+  res.status(200).json(id);
   } catch (error) {
     console.error("Error deleting course:", error);
     res.status(500).json({ message: "Server error" });

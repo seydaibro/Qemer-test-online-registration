@@ -5,7 +5,7 @@ import { Outlet } from "react-router-dom";
 import { useState } from "react";
 import SignUp from "@/pages/signup";
 import SignIn from "@/pages/signin";
-import Home from "@/pages/home";
+
 
 interface itemProp{
   onOpenSignUP:()=> void

@@ -11,14 +11,16 @@ const Home = ({ onOpen }: ItemProp) => {
   const [isAdminRegister, setIsAdminRegister] = useState(false);
 
   return (
-    <section className=" bg-blue-800 text-white h-screen flex items-center justify-center">
+    <>
       {/* Conditional rendering for the SignUp component */}
       {isAdminRegister && (
         <SignUp onClose={() => setIsAdminRegister(false)} role="admin" />
       )}
 
+    <section className=" bg-blue-800 text-white h-screen flex items-center justify-center">
+    
       {/* Main Content */}
-      <div className="container mx-auto text-center relative z-10">
+      <div className=" mx-auto text-center relative z-10">
         <h1 className="text-5xl font-bold mb-4">
           Welcome to Pawe Tech University
         </h1>
@@ -47,7 +49,7 @@ const Home = ({ onOpen }: ItemProp) => {
             onClick={onOpen}
             className="bg-gray-100 hover:bg-gray-200 text-blue-900 px-6 py-3 rounded-lg font-semibold"
           >
-            Signup
+            Sign Up
           </button>
         </div>
       </div>
@@ -58,6 +60,7 @@ const Home = ({ onOpen }: ItemProp) => {
         style={{ backgroundImage: "url('/path/to/your/background.jpg')" }}
       ></div>
     </section>
+    </>
   );
 };
 

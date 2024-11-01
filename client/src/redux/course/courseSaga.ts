@@ -53,9 +53,9 @@ function* EditCourseSaga(action: any): Generator {
 
 function* DeleteCourseSaga(action: any): Generator {
   try {
-    const { brand_id } = action.payload;
-    yield privateAxios.delete("/course/" + brand_id);
-    yield put(deleteCourseSuccess({ brand_id: brand_id }));
+    const { id } = action.payload;
+    yield privateAxios.delete("/course/delete/" + id);
+    yield put(deleteCourseSuccess(id));
   } catch (error: any) {
     yield put(deleteCourseError(error.response.data.error));
   }

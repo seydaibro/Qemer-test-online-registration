@@ -3,14 +3,15 @@ import { ICourse } from "@/interface";
 import AddCourseModal from "@/components/AddCourses";
 import { useState } from "react";
 import { deleteCourse } from "@/redux/course/courseSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector} from "react-redux";
+import { RootState } from "@/redux/store";
 
 const CourseDetail = () => {
   const location = useLocation();
   const dispatch = useDispatch()
   const currentCourse: ICourse = location.state?.currentCourse;
   const [isOpenEditCourse, setIsOpenEditCourse] = useState(false);
-
+  const { user } = useSelector((state: RootState) => state.auth);
   const handleDeletecourse = () =>{
   dispatch(deleteCourse(currentCourse._id))
   }
@@ -52,7 +53,7 @@ const CourseDetail = () => {
           )}
 
           {/* Action Buttons */}
-          <div className="flex space-x-4 mt-6">
+          { user?.role === "admin" &&  <div className="flex space-x-4 mt-6">
             <button
               className="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 transition"
               onClick={() => setIsOpenEditCourse(true)}
@@ -65,7 +66,8 @@ const CourseDetail = () => {
             >
               Delete Course
             </button>
-          </div>
+          </div> }
+         
         </div>
       </div>
     </div>
