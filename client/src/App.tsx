@@ -27,32 +27,9 @@ interface ProtectedPageProps {
 }
 
 function App() {
-  const { user, token } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch();
+  
 const [isSignUpOpen, setIsSignUpOpen] = useState(false)
-  const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-    if (!user && !token) {
-      return <Navigate to="/" />;
-    }
-    return <>{children}</>;
-  };
-
-  const ProtectedPage: React.FC<ProtectedPageProps> = ({
-    children,
-    requiredPermission,
-  }) => {
-    const { user } = useSelector((state: RootState) => state.auth);
-
-    if (
-      !user ||
-      !user.permissions.some((perm) => perm.name === requiredPermission)
-    ) {
-      return <Navigate to="/not_authorized" />;
-    }
-
-    return <>{children}</>;
-  };
-
+ 
   const router = createBrowserRouter([
     {
       path: "/",
