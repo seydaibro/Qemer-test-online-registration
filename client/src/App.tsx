@@ -3,28 +3,17 @@ import "./index.css";
 import {
   createBrowserRouter,
   RouterProvider,
-  Navigate,
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "./redux/store";
 import 'react-toastify/dist/ReactToastify.css';
 import Home from "./pages/home";
-import Signin from "./pages/signin";
+
 import Courses from "./pages/courses";
-import SignUp from "./pages/signup";
+
 import { useState } from "react";
 import CourseDetail from "./pages/courseDetail";
 import StudentsList from "./pages/studentsList";
 import Profile from "./pages/profile";
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-}
-
-interface ProtectedPageProps {
-  children: React.ReactNode;
-  requiredPermission: string;
-}
 
 function App() {
   
