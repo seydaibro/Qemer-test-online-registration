@@ -2,11 +2,7 @@ const User = require("../model/user");
 const Course = require("../model/course")
 const Permission = require("../model/permission");
 const bcrypt = require("bcryptjs");
-const {
-  defaultStockKeeperPermission,
-  defaultsalePermission,
-  DefaultAdminsystemAllowance,
-} = require("../constant");
+
 
 
 
