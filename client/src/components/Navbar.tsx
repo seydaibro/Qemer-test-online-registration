@@ -27,10 +27,8 @@ const Navbar = ({ onOpenSignUP, onOpenLogin }: itemProp) => {
   };
   return (
     <nav className="bg-blue-900 text-white shadow-md">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <div className=" relative container mx-auto z-50 px-4 py-4 flex items-center justify-between">
         <div className="text-2xl font-bold">Pawe Tech University</div>
-
-        {/* Desktop Menu */}
         <div className="hidden md:flex space-x-6 items-center">
           <Link to="/" className="hover:text-gray-300">
             Home
@@ -47,7 +45,7 @@ const Navbar = ({ onOpenSignUP, onOpenLogin }: itemProp) => {
                 Login
               </button>
               <button onClick={onOpenSignUP} className="hover:text-gray-300">
-                Signup
+                Sign Up
               </button>
             </>
           ) : (
