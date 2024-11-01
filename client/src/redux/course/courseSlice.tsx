@@ -58,14 +58,14 @@ const courseSlice = createSlice({
       state.isEditCourseLoading = true;
     },
     EditCourseSuccess: (state, action) => {
-      const { brand_id, updatedBrand } = action.payload;
+      const { id, updatedCourse } = action.payload;
       // const Brand_id = action.payload.Brand_id;
       const updated_Items = state.courses.reduce(
-        (accumulater: ICourse[], brand) => {
-          if (brand_id === brand._id) {
-            return [...accumulater, updatedBrand];
+        (accumulater: ICourse[], c) => {
+          if (id === c._id) {
+            return [...accumulater, updatedCourse];
           } else {
-            return [...accumulater, brand];
+            return [...accumulater, c];
           }
         },
         []
@@ -85,8 +85,8 @@ const courseSlice = createSlice({
     deleteCourseSuccess: (state, action) => {
       state.isDeleteCourseLoading = false;
       state.error = null;
-      const { brand_id } = action.payload;
-      state.courses = state.courses.filter((brand) => brand._id !== brand_id);
+      const { id} = action.payload;
+      state.courses = state.courses.filter((c) => c._id !== id);
     },
     deleteCourseError: (state, action) => {
       state.isDeleteCourseLoading = false;

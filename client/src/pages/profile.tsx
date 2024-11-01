@@ -1,30 +1,35 @@
-import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import  { useEffect, useState } from "react";
+import { useLocation , useNavigate} from "react-router-dom";
 import { IUser } from "@/interface";
 import { ICourse } from "@/interface";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import AddCourseModal from "@/components/AddCourses";
 import SignUp from "./signup";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { getUserById } from "@/redux/user/userSlice";
+import { getUserById, deleteUser,  } from "@/redux/user/userSlice";
+import { userLogout } from "@/redux/auth/authSlice";
 const Profile = () => {
   const location = useLocation();
   const user: IUser = location.state?.user;
   const dispatch = useDispatch();
-
-  const [profileImage, setProfileImage] = useState(user.imageUrl);
+const navigate = useNavigate()
   const [isEditOpen, setIseditOpen] = useState(false);
-  const { selectedUser } = useSelector((state: RootState) => state.user);
+  const { selectedUser, isDeletingUserLoading, error } = useSelector((state: RootState) => state.user);
+  const [isdelete, setIsdele] = useState(false)
   console.log("user", user);
-  const handleEditAccount = () => {
-    console.log("Edit account clicked");
-  };
+ 
 
   const handleDeleteAccount = () => {
-    console.log("Delete account clicked");
+    dispatch(deleteUser({id:user?._id}))
+    setIsdele(true)
   };
 
+  useEffect(()=>{
+    if(!isDeletingUserLoading! && !error && isdelete){
+      dispatch(userLogout())
+      navigate("/")  
+    }
+  },[isdelete, isDeletingUserLoading])
   useEffect(() => {
     dispatch(getUserById({ id: user?._id }));
   }, []);
@@ -40,7 +45,7 @@ const Profile = () => {
           <div className="flex flex-col sm:flex-row items-center p-3 md:p-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
             <div className="relative mb-4 sm:mb-0">
               <img
-                src={profileImage || "/assets/icons/user.png"}
+                src={ "/assets/icons/user.png"}
                 alt="User Profile"
                 className="w-24 h-24 sm:w-36 sm:h-36 rounded-full object-cover cursor-pointer border-4 border-white"
               />

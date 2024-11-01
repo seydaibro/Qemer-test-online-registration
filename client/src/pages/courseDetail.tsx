@@ -1,20 +1,32 @@
-import { useLocation } from "react-router-dom";
+import { useLocation , useNavigate} from "react-router-dom";
 import { ICourse } from "@/interface";
 import AddCourseModal from "@/components/AddCourses";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { deleteCourse } from "@/redux/course/courseSlice";
 import { useDispatch, useSelector} from "react-redux";
 import { RootState } from "@/redux/store";
 
+
 const CourseDetail = () => {
   const location = useLocation();
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const currentCourse: ICourse = location.state?.currentCourse;
   const [isOpenEditCourse, setIsOpenEditCourse] = useState(false);
   const { user } = useSelector((state: RootState) => state.auth);
+  const [isdelete, setIsdele] = useState(false)
+  const { isDeleteCourseLoading , error} = useSelector((state: RootState) => state.courses);
   const handleDeletecourse = () =>{
-  dispatch(deleteCourse(currentCourse._id))
+  dispatch(deleteCourse({id:currentCourse._id}))
+   setIsdele(true)
+  
   }
+
+  useEffect(()=>{
+    if(isDeleteCourseLoading! && !error && isdelete){
+      navigate("/courses")
+    }
+  },[isdelete, isDeleteCourseLoading])
   return (
     <>
      {isOpenEditCourse && (
@@ -61,7 +73,7 @@ const CourseDetail = () => {
               Edit Course
             </button>
             <button
-              className="bg-red text-white px-4 py-2 rounded-md shadow hover:bg-red-700 transition"
+              className="bg-rose-600 text-white px-4 py-2 rounded-md shadow hover:bg-rose-700 transition"
               onClick={handleDeletecourse}
             >
               Delete Course

@@ -75,12 +75,9 @@ const userSlice= createSlice({
       state.isDeletingUserLoading = true;
       state.error = null
     }, 
-    deleteUserSuccess:(state, action)=>{
+    deleteUserSuccess:(state, _action)=>{
       state.isDeletingUserLoading = false;
       state.error = null
-      const {user_id} = action.payload;
-      console.log("users in sate.users", JSON.parse(JSON.stringify(state.users)))
-      state.users = state.users.filter((user)=> user._id !== user_id)
     },
     deleteUserError:(state, action)=>{
       state.isDeletingUserLoading = false;

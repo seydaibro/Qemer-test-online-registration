@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect , useRef} from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AiOutlineClose } from 'react-icons/ai';
 import { userRegister, editUser } from '@/redux/user/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { userschema } from '@/validation';
 import { RootState } from '@/redux/store';
+import { IoClose } from 'react-icons/io5';
 
 interface IFormInputs {
   firstName: string;
@@ -24,6 +24,7 @@ interface ItemProp {
 
 const SignUp: React.FC<ItemProp> = ({ onClose, role, type = "add" }) => {
   const dispatch = useDispatch();
+  const ref = useRef<HTMLDivElement>(null);
   const { user } = useSelector((state: RootState) => state.auth);
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<IFormInputs>({
     resolver: zodResolver(userschema),
@@ -50,13 +51,24 @@ const SignUp: React.FC<ItemProp> = ({ onClose, role, type = "add" }) => {
     }
     onClose();
   };
+  useEffect(() => {
+    document.addEventListener("click", hideOnClickOutside, true);
+  }, []);
+  const hideOnClickOutside = (e) => {
+    if (ref.current && !ref.current.contains(e.target)) {
+    onClose()
+    }
+  };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
-      <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg relative">
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50" >
+      <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg relative" ref={ref}>
         
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-700 hover:text-gray-900">
-          <AiOutlineClose size={24} />
+      <button
+          className="absolute top-6 right-6 text-gray-900 border border-gray-300 rounded-full p-1 hover:bg-gray-200 transition"
+          onClick={onClose}
+        >
+          <IoClose size={20} />
         </button>
         
         <h2 className="text-2xl font-bold mb-4 text-center">
